@@ -1,0 +1,31 @@
+import { createCommandConfig } from "robo.js";
+import path from "path";
+export const config = createCommandConfig({
+    description: 'Play a sound.',
+    options: [
+        {
+            name: 'sound',
+            description: 'The sound of the file to play. Type /list sounds to see the list of available sounds.',
+            type: 'string',
+            required: true
+        }
+    ]
+});
+export default (async (interaction)=>{
+    await interaction.deferReply({
+        ephemeral: true
+    });
+    return interaction.editReply("Command currently not working. It is in development.");
+    const soundName = interaction.options.getString('sound');
+    if (!soundName) {
+        return interaction.editReply({
+            content: 'Please provide a valid sound name.'
+        });
+    }
+    const soundPath = path.join(__dirname, '../../sounds', `${soundName}.mp3`);
+    await interaction.editReply({
+        content: `Playing sound: **${soundName}**`
+    });
+});
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkQ6XFxEZXZlbG9wZW1lbnRcXERpc2NvcmQgQm90c1xcSmF2YVNjcmlwdFxcQm9iXFxzcmNcXGNvbW1hbmRzXFxwbGF5XFxzb3VuZC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBjcmVhdGVDb21tYW5kQ29uZmlnIH0gZnJvbSBcInJvYm8uanNcIjtcclxuaW1wb3J0IHsgQ2hhdElucHV0Q29tbWFuZEludGVyYWN0aW9uLCBHdWlsZE1lbWJlciB9IGZyb20gXCJkaXNjb3JkLmpzXCI7XHJcbmltcG9ydCB7IGNyZWF0ZUF1ZGlvUGxheWVyLCBjcmVhdGVBdWRpb1Jlc291cmNlLCBqb2luVm9pY2VDaGFubmVsLCBBdWRpb1Jlc291cmNlIH0gZnJvbSBcIkBkaXNjb3JkanMvdm9pY2VcIjtcclxuaW1wb3J0IHsgcHJvbWlzZXMgYXMgZnMgfSBmcm9tIFwiZnNcIjtcclxuaW1wb3J0IHBhdGggZnJvbSBcInBhdGhcIjtcclxuXHJcbmV4cG9ydCBjb25zdCBjb25maWcgPSBjcmVhdGVDb21tYW5kQ29uZmlnKHtcclxuICAgIGRlc2NyaXB0aW9uOiAnUGxheSBhIHNvdW5kLicsXHJcbiAgICBvcHRpb25zOiBbXHJcbiAgICAgICAge1xyXG4gICAgICAgICAgICBuYW1lOiAnc291bmQnLFxyXG4gICAgICAgICAgICBkZXNjcmlwdGlvbjogJ1RoZSBzb3VuZCBvZiB0aGUgZmlsZSB0byBwbGF5LiBUeXBlIC9saXN0IHNvdW5kcyB0byBzZWUgdGhlIGxpc3Qgb2YgYXZhaWxhYmxlIHNvdW5kcy4nLFxyXG4gICAgICAgICAgICB0eXBlOiAnc3RyaW5nJyxcclxuICAgICAgICAgICAgcmVxdWlyZWQ6IHRydWVcclxuICAgICAgICB9XHJcbiAgICBdXHJcbn0gYXMgY29uc3QpXHJcblxyXG5leHBvcnQgZGVmYXVsdCBhc3luYyAoaW50ZXJhY3Rpb246IENoYXRJbnB1dENvbW1hbmRJbnRlcmFjdGlvbikgPT4ge1xyXG4gICAgYXdhaXQgaW50ZXJhY3Rpb24uZGVmZXJSZXBseSh7IGVwaGVtZXJhbDogdHJ1ZSB9KTtcclxuXHJcbiAgICByZXR1cm4gaW50ZXJhY3Rpb24uZWRpdFJlcGx5KFwiQ29tbWFuZCBjdXJyZW50bHkgbm90IHdvcmtpbmcuIEl0IGlzIGluIGRldmVsb3BtZW50LlwiKVxyXG5cclxuICAgIGNvbnN0IHNvdW5kTmFtZSA9IGludGVyYWN0aW9uLm9wdGlvbnMuZ2V0U3RyaW5nKCdzb3VuZCcpO1xyXG5cclxuICAgIGlmICghc291bmROYW1lKSB7XHJcbiAgICAgICAgcmV0dXJuIGludGVyYWN0aW9uLmVkaXRSZXBseSh7XHJcbiAgICAgICAgICAgIGNvbnRlbnQ6ICdQbGVhc2UgcHJvdmlkZSBhIHZhbGlkIHNvdW5kIG5hbWUuJ1xyXG4gICAgICAgIH0pO1xyXG4gICAgfVxyXG5cclxuICAgIGNvbnN0IHNvdW5kUGF0aCA9IHBhdGguam9pbihfX2Rpcm5hbWUsICcuLi8uLi9zb3VuZHMnLCBgJHtzb3VuZE5hbWV9Lm1wM2ApO1xyXG5cclxuICAgIGF3YWl0IGludGVyYWN0aW9uLmVkaXRSZXBseSh7XHJcbiAgICAgICAgY29udGVudDogYFBsYXlpbmcgc291bmQ6ICoqJHtzb3VuZE5hbWV9KipgXHJcbiAgICB9KTtcclxufTsiXSwibmFtZXMiOlsiY3JlYXRlQ29tbWFuZENvbmZpZyIsInBhdGgiLCJjb25maWciLCJkZXNjcmlwdGlvbiIsIm9wdGlvbnMiLCJuYW1lIiwidHlwZSIsInJlcXVpcmVkIiwiaW50ZXJhY3Rpb24iLCJkZWZlclJlcGx5IiwiZXBoZW1lcmFsIiwiZWRpdFJlcGx5Iiwic291bmROYW1lIiwiZ2V0U3RyaW5nIiwiY29udGVudCIsInNvdW5kUGF0aCIsImpvaW4iLCJfX2Rpcm5hbWUiXSwibWFwcGluZ3MiOiJBQUFBLFNBQVNBLG1CQUFtQixRQUFRLFVBQVU7QUFJOUMsT0FBT0MsVUFBVSxPQUFPO0FBRXhCLE9BQU8sTUFBTUMsU0FBU0Ysb0JBQW9CO0lBQ3RDRyxhQUFhO0lBQ2JDLFNBQVM7UUFDTDtZQUNJQyxNQUFNO1lBQ05GLGFBQWE7WUFDYkcsTUFBTTtZQUNOQyxVQUFVO1FBQ2Q7S0FDSDtBQUNMLEdBQVc7QUFFWCxlQUFlLENBQUEsT0FBT0M7SUFDbEIsTUFBTUEsWUFBWUMsVUFBVSxDQUFDO1FBQUVDLFdBQVc7SUFBSztJQUUvQyxPQUFPRixZQUFZRyxTQUFTLENBQUM7SUFFN0IsTUFBTUMsWUFBWUosWUFBWUosT0FBTyxDQUFDUyxTQUFTLENBQUM7SUFFaEQsSUFBSSxDQUFDRCxXQUFXO1FBQ1osT0FBT0osWUFBWUcsU0FBUyxDQUFDO1lBQ3pCRyxTQUFTO1FBQ2I7SUFDSjtJQUVBLE1BQU1DLFlBQVlkLEtBQUtlLElBQUksQ0FBQ0MsV0FBVyxnQkFBZ0IsR0FBR0wsVUFBVSxJQUFJLENBQUM7SUFFekUsTUFBTUosWUFBWUcsU0FBUyxDQUFDO1FBQ3hCRyxTQUFTLENBQUMsaUJBQWlCLEVBQUVGLFVBQVUsRUFBRSxDQUFDO0lBQzlDO0FBQ0osQ0FBQSxFQUFFIn0=

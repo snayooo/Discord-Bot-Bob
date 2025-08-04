@@ -1,0 +1,60 @@
+{
+	"name": "Bob",
+	"description": "",
+	"version": "1.0.0",
+	"type": "module",
+	"private": true,
+	"keywords": [
+		"bot",
+		"discord",
+		"discord.js",
+		"robo",
+		"robo.js",
+		"typescript"
+	],
+	"scripts": {
+		"build": "robo build",
+		"deploy": "robo deploy",
+		"dev": "robox dev",
+		"doctor": "sage doctor",
+		"invite": "robo invite",
+		"lint": "npm run lint:eslint && npm run lint:style",
+		"lint:eslint": "eslint -c config/eslint.ts .",
+		"lint:style": "prettier --write .",
+		"start": "robo start",
+		"upgrade": "sage upgrade"
+	},
+	"dependencies": {
+		"@discord-player/extractor": "^7.1.0",
+		"@discordjs/opus": "^0.10.0",
+		"@discordjs/voice": "^0.18.0",
+		"@prisma/client": "^6.12.0",
+		"axios": "^1.11.0",
+		"discord-player": "^6.6.6",
+		"discord.js": "^14.21.0",
+		"ffmpeg-static": "^5.2.0",
+		"mediaplex": "^1.0.0",
+		"node-cron": "^4.2.1",
+		"node-fetch": "^3.3.2",
+		"node-ssh": "^13.2.1",
+		"node-youtube-music": "^0.10.3",
+		"opusscript": "^0.1.1",
+		"play-dl": "^1.9.7",
+		"prisma": "^6.12.0",
+		"rcon-client": "^4.2.5",
+		"robo.js": "^0.10.30",
+		"youtube-dl-exec": "^3.0.22",
+		"ytdl-core": "^4.11.5"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.32.0",
+		"@swc/core": "^1.13.2",
+		"@types/node": "^24.1.0",
+		"@types/node-fetch": "^2.6.12",
+		"eslint": "^9.32.0",
+		"globals": "^16.3.0",
+		"prettier": "^3.6.2",
+		"typescript": "^5.8.3",
+		"typescript-eslint": "^8.38.0"
+	}
+}

@@ -1,0 +1,444 @@
+import { createAudioResource, createAudioPlayer, joinVoiceChannel, AudioPlayerStatus } from "@discordjs/voice";
+import { ChatInputCommandInteraction } from "discord.js";
+import { client, createCommandConfig } from "robo.js";
+import play from 'play-dl';
+import fetch from 'node-fetch';
+
+// YouTube cookie setup - Using your actual cookies
+const setupYouTubeCookies = async () => {
+    try {
+        await play.setToken({
+            youtube: {
+                cookie: "VISITOR_PRIVACY_METADATA=CgJMVRIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiBe; YSC=k9PIhULoegs; PREF=f6=40000000&f7=4100&tz=Europe.Luxembourg&f5=20000; APISID=VNx2Ha8cO5l0c1Wf/A_LsznjTdd2AZ9-2r; SAPISID=9coV0bkb82Ry95_f/APmJjF_Y254v3ob2x; __Secure-1PAPISID=9coV0bkb82Ry95_f/APmJjF_Y254v3ob2x; __Secure-1PSID=g.a000zAgZVsJeK9Qg96U3mEb0RegcB5By9zucX177gk1rvWXpN6t1susUked-65js4IUsLc5ejQACgYKAX4SARISFQHGX2Mi2_NBQyq3mBLdAxOSaURb2BoVAUF8yKpMfLikDzs4G98huXm1wD6H0076; __Secure-1PSIDCC=AKEyXzUNID2vcFBWiAw656XIvkICDzCoQ95zJUyON13TCozknE-ACEZaRKM5jbMob9MxwGCUew; __Secure-1PSIDTS=sidts-CjEB5H03Pzk93vryJFRy6mZngVLx_dkcpeSzefXP9xUl6ES4RirAF-N5M_25ta0y8l7PEAA; __Secure-3PAPISID=9coV0bkb82Ry95_f/APmJjF_Y254v3ob2x; __Secure-3PSID=g.a000zAgZVsJeK9Qg96U3mEb0RegcB5By9zucX177gk1rvWXpN6t1EGGtH7YsGz4fhFpIKzWrbgACgYKAZASARISFQHGX2MiILirGzwhr4S9Y2SNt6JcXhoVAUF8yKrcpJ3of6exhnKj6xZefO3v0076; __Secure-3PSIDCC=AKEyXzVsyQzvMozFMWcmVkV_u9D8lOwAqwAyr6_o7UMSPipw2OYEPKulVW31qMd26VBXlmbKHC0; __Secure-3PSIDTS=sidts-CjEB5H03Pzk93vryJFRy6mZngVLx_dkcpeSzefXP9xUl6ES4RirAF-N5M_25ta0y8l7PEAA; __Secure-ROLLOUT_TOKEN=CMey-cu_u82MvwEQ_5yTqvGCjgMYsLWC-drhjgM%3D; SID=g.a000zAgZVsJeK9Qg96U3mEb0RegcB5By9zucX177gk1rvWXpN6t1mdUEZAx4pdolL6vHc7Cw4AACgYKASASARISFQHGX2Mi9C7r_j_d6tDdy3Mcrmy1SRoVAUF8yKokA5HMpy0CP3dmqOzG1LWg0076; HSID=AwBjgQ8mScGSODPw_; SSID=AvKSAyza7KhoCKrCJ; SIDCC=AKEyXzXawY0jIdgCs4pynkVsE6a4G1842ftbnKr2d9LVd2Rt3Nnp2jX3MMPMOgyxPdTHNjkWrw; __Secure-YEC=CgtrYk1oNVcxX1FURSibyqTEBjInCgJMVRIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiBe; LOGIN_INFO=AFmmF2swRAIgHiScigRw4TwbvGM6gDenDKDkWnQJpeSCMrc88zqUcd4CICjJ9xYzuSVSTd2COeCgDZTxRZRjmS3i0S-9L4T9aaKK:QUQ3MjNmeHphLTNHR240WW5kMkhTYm13WTJlUTlNUkJXLU1TLXNwZU9TYkRSX1pCOXNnelpsazNxeDBNdVB3VDdLalpDdHBIMkFHTHdLYVdOZ0FteGlFcDZ1YTdxQ1ltaXhBeU5IRFhCQkxxUlV0ZlpYSGlPYUw2N0Q1SUlQMFRRbnR3eHl6STg1OGRMUVI3WkZjX1FsMU9YQWRiVG11cXlB"
+            }
+        });
+        
+        console.log('✅ YouTube cookies setup successful!');
+        
+    } catch (error) {
+        console.log('❌ Cookie setup failed:', error);
+        // Continue without authentication - some videos may still work
+    }
+};
+
+// SoundCloud authorization setup
+const setupSoundCloudAuth = async () => {
+    try {
+        // For SoundCloud, we'll try to authorize using play-dl's built-in method
+        // Note: SoundCloud doesn't require cookies like YouTube, but needs proper initialization
+        await play.authorization();
+        console.log('✅ SoundCloud authorization successful!');
+    } catch (error) {
+        console.log('❌ SoundCloud authorization failed:', error);
+        // Continue without SoundCloud auth - search might still work
+    }
+};
+
+// Initialize cookies once
+let cookiesInitialized = false;
+let soundcloudInitialized = false;
+
+export const config = createCommandConfig({
+    description: 'Play music from YouTube, SoundCloud, or direct audio URLs.',
+    options: [
+        {
+            name: 'song',
+            description: 'Song name, YouTube URL, SoundCloud URL, or direct audio URL',
+            type: 'string',
+            required: true
+        }
+    ]
+} as const);
+
+export default async (interaction: ChatInputCommandInteraction) => {
+    await interaction.deferReply({ ephemeral: true });
+
+    const optionSong = interaction.options.getString('song');
+
+    if (!optionSong) {
+        return interaction.editReply({
+            content: 'Please provide a valid song name.'
+        });
+    }
+
+    if(interaction.guild === null) {
+        return interaction.editReply({
+            content: 'This command can only be used in a server.'
+        });
+    }
+
+    const guild = client.guilds.cache.get(interaction.guild.id);
+    const member = guild?.members.cache.get(interaction.user.id);
+
+    if(!guild || !member) {
+        return interaction.editReply({
+            content: 'There was an error retrieving the guild or member information.'
+        });
+    }
+
+    const voiceChannel = member.voice.channel?.id;
+
+    if(!voiceChannel) {
+        return interaction.editReply({
+            content: 'You need to be in a voice channel to play a song.'
+        });
+    }
+
+    // Initialize play-dl with cookies and SoundCloud auth if needed
+    if (!cookiesInitialized) {
+        await interaction.editReply({
+            content: '🔧 Setting up YouTube authentication...'
+        });
+        await setupYouTubeCookies();
+        cookiesInitialized = true;
+    }
+
+    if (!soundcloudInitialized) {
+        await interaction.editReply({
+            content: '🔧 Setting up SoundCloud authentication...'
+        });
+        await setupSoundCloudAuth();
+        soundcloudInitialized = true;
+    }
+
+    let song;
+    let songName = optionSong; // Default to the search term
+
+    // Check if it's a URL and determine platform
+    const isYouTubeUrl = optionSong.includes('youtube.com') || optionSong.includes('youtu.be');
+    const isSoundCloudUrl = optionSong.includes('soundcloud.com');
+    const isDirectUrl = optionSong.startsWith('http') && !isYouTubeUrl && !isSoundCloudUrl;
+    const isUrl = isYouTubeUrl || isSoundCloudUrl || isDirectUrl;
+
+    try {
+        if (isUrl) {
+            if (isYouTubeUrl) {
+                await interaction.editReply({
+                    content: '🔗 Processing YouTube URL...'
+                });
+                song = optionSong;
+                console.log(`🔗 Using YouTube URL: ${song}`);
+                
+                try {
+                    const info = await play.video_basic_info(optionSong);
+                    songName = info.video_details.title || songName;
+                    console.log(`📝 Song title: ${songName}`);
+                } catch {
+                    songName = 'YouTube Song';
+                    console.log(`⚠️ Could not get YouTube video info, using fallback name`);
+                }
+            } else if (isSoundCloudUrl) {
+                await interaction.editReply({
+                    content: '🎵 Processing SoundCloud URL...'
+                });
+                song = optionSong;
+                console.log(`🔗 Using SoundCloud URL: ${song}`);
+                
+                // For SoundCloud URLs, we'll get the title during streaming
+                // to avoid the authorization error here
+                songName = 'SoundCloud Track';
+                console.log(`📝 SoundCloud URL processed, will get track info during streaming`);
+            } else if (isDirectUrl) {
+                await interaction.editReply({
+                    content: '🔗 Processing direct audio URL...'
+                });
+                song = optionSong;
+                songName = 'Direct Audio Stream';
+                console.log(`� Using direct URL: ${song}`);
+            }
+        } else {
+            await interaction.editReply({
+                content: `�🔍 Searching for: **${optionSong}**...`
+            });
+            console.log(`🔍 Searching for: ${optionSong}`);
+            
+            // Try YouTube first, then SoundCloud as fallback
+            let searchResults = [];
+            let searchPlatform = 'unknown';
+            
+            try {
+                // First try YouTube search
+                console.log('🔍 Trying YouTube search...');
+                searchResults = await play.search(optionSong, { 
+                    limit: 1,
+                    source: { youtube: "video" }
+                });
+                searchPlatform = 'YouTube';
+            } catch (searchError) {
+                console.log('❌ YouTube search failed, trying SoundCloud...');
+                await interaction.editReply({
+                    content: `🔍 YouTube search failed, trying SoundCloud for: **${optionSong}**...`
+                });
+                
+                try {
+                    searchResults = await play.search(optionSong, { 
+                        limit: 1,
+                        source: { soundcloud: "tracks" }
+                    });
+                    searchPlatform = 'SoundCloud';
+                } catch (soundcloudError) {
+                    console.log('❌ SoundCloud search failed, trying general search...');
+                    await interaction.editReply({
+                        content: `🔍 Trying general search for: **${optionSong}**...`
+                    });
+                    
+                    try {
+                        searchResults = await play.search(optionSong, { limit: 1 });
+                        searchPlatform = 'General';
+                    } catch (fallbackError) {
+                        console.error('❌ All search methods failed:', fallbackError);
+                        return interaction.editReply({
+                            content: 'Search failed on all platforms. Please try with a direct URL (YouTube, SoundCloud, or direct audio link).'
+                        });
+                    }
+                }
+            }
+            
+            console.log(`📊 Search results from ${searchPlatform}:`, searchResults.length);
+            
+            if (searchResults.length === 0) {
+                return interaction.editReply({
+                    content: 'No results found on any platform. Try using a direct URL or different search terms.'
+                });
+            }
+            
+            songName = searchResults[0].title || searchResults[0].name || 'Unknown Song';
+            song = searchResults[0].url;
+            console.log(`✅ Found song on ${searchPlatform}: ${songName}`);
+            console.log(`🔗 Song URL: ${song}`);
+            
+            await interaction.editReply({
+                content: `✅ Found on ${searchPlatform}: **${songName}**`
+            });
+        }
+        
+        // Validate that we have a song URL
+        if (!song) {
+            console.error('❌ Song URL is undefined');
+            return interaction.editReply({
+                content: 'Failed to get song URL. Please try again.'
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error validating/searching song:', error);
+        return interaction.editReply({
+            content: 'Failed to find or validate the song. Try using a direct YouTube URL or check if the song exists.'
+        });
+    }
+
+    try {
+        console.log(`🎵 Attempting to stream: ${song}`);
+        
+        await interaction.editReply({
+            content: `📋 Validating video: **${songName}**...`
+        });
+        
+        // Try to get video/track info first to validate the URL and determine platform
+        let videoInfo;
+        let platform = 'Unknown';
+        
+        try {
+            if (song.includes('soundcloud.com')) {
+                console.log('🎵 Detected SoundCloud URL, attempting direct streaming...');
+                platform = 'SoundCloud';
+                // Skip getting track info to avoid authorization error
+                // We'll get the info during streaming
+                console.log(`📋 SoundCloud URL detected, proceeding to stream`);
+            } else if (song.includes('youtube.com') || song.includes('youtu.be')) {
+                console.log('📺 Detected YouTube URL, getting video info...');
+                videoInfo = await play.video_basic_info(song);
+                platform = 'YouTube';
+                console.log(`📋 YouTube video info retrieved: ${videoInfo.video_details.title}`);
+            } else {
+                console.log('🔗 Direct URL detected, attempting to stream...');
+                platform = 'Direct URL';
+            }
+        } catch (infoError) {
+            console.error('❌ Failed to get media info:', infoError);
+            // For SoundCloud, we'll continue and try streaming directly
+            if (song.includes('soundcloud.com')) {
+                console.log('⚠️ SoundCloud info failed, but continuing with direct streaming...');
+                platform = 'SoundCloud';
+            } else {
+                return interaction.editReply({
+                    content: `Failed to access ${platform} information. The media might be private, region-locked, or unavailable.`
+                });
+            }
+        }
+        
+        await interaction.editReply({
+            content: `🎵 Preparing ${platform} stream for: **${songName}**...`
+        });
+        
+        // Try streaming with multiple methods based on platform
+        let stream: any;
+        
+        try {
+            console.log(`🎵 Method 1: Platform-specific streaming for ${platform}...`);
+            
+            await interaction.editReply({
+                content: `🎵 Creating ${platform} stream for: **${songName}**...`
+            });
+            
+            if (platform === 'SoundCloud') {
+                // SoundCloud streaming - use direct URL approach
+                console.log('🎵 Using SoundCloud direct stream...');
+                stream = await play.stream(song, {
+                    discordPlayerCompatibility: true,
+                    quality: 1
+                });
+            } else if (platform === 'YouTube') {
+                // YouTube streaming with fresh info
+                const freshVideoInfo = await play.video_basic_info(song);
+                console.log('📋 Fresh YouTube info obtained, streaming immediately...');
+                stream = await play.stream_from_info(freshVideoInfo, {
+                    discordPlayerCompatibility: true,
+                    quality: 1
+                });
+            } else {
+                // Direct URL streaming
+                console.log('🔗 Using direct URL stream...');
+                stream = await play.stream(song, {
+                    discordPlayerCompatibility: true
+                });
+            }
+            
+            console.log(`✅ Method 1 succeeded - ${platform} stream`);
+            
+        } catch (error: any) {
+            console.log(`❌ Method 1 failed for ${platform}:`, error.message);
+            
+            // Fallback methods
+            try {
+                console.log('🔄 Method 2: Using direct URL with compatibility settings...');
+                await interaction.editReply({
+                    content: `🔄 Trying alternative method for: **${songName}**...`
+                });
+                
+                stream = await play.stream(song, { 
+                    discordPlayerCompatibility: true,
+                    quality: 0 // Lowest quality for maximum compatibility
+                });
+                console.log('✅ Method 2 succeeded - direct URL low quality');
+                
+            } catch (compatError: any) {
+                console.log('❌ Method 2 failed:', compatError.message);
+                
+                try {
+                    console.log('🔄 Method 3: Basic stream without options...');
+                    await interaction.editReply({
+                        content: `🔄 Last attempt for: **${songName}**...`
+                    });
+                    
+                    stream = await play.stream(song);
+                    console.log('✅ Method 3 succeeded - basic stream');
+                    
+                } catch (basicError: any) {
+                    console.log('❌ Method 3 failed:', basicError.message);
+                    
+                    // Final fallback with delay
+                    try {
+                        console.log('🔄 Method 4: Delayed retry...');
+                        await interaction.editReply({
+                            content: `🔄 Final attempt for: **${songName}**...`
+                        });
+                        
+                        // Small delay to let any rate limiting reset
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        
+                        if (platform === 'SoundCloud') {
+                            stream = await play.stream(song);
+                        } else if (platform === 'YouTube') {
+                            const retryVideoInfo = await play.video_basic_info(song);
+                            stream = await play.stream_from_info(retryVideoInfo);
+                        } else {
+                            stream = await play.stream(song);
+                        }
+                        console.log('✅ Method 4 succeeded - delayed retry');
+                        
+                    } catch (finalError: any) {
+                        console.error('❌ All streaming methods failed:', {
+                            platform: platform,
+                            method1: error.message,
+                            method2: compatError.message,
+                            method3: basicError.message,
+                            method4: finalError.message,
+                            songUrl: song
+                        });
+                        
+                        return interaction.editReply({
+                            content: `❌ **Unable to stream from ${platform}: ${songName}**\n\`\`\`\nAll streaming methods failed.\nThis ${platform.toLowerCase()} track may be:\n• Region-locked\n• Age-restricted\n• Blocked for bots\n• Recently made private\n\`\`\`\n💡 **Try:** A different track, platform, or direct audio URL`
+                        });
+                    }
+                }
+            }
+        }
+        
+        if (!stream) {
+            console.error('❌ Stream is null or invalid');
+            return interaction.editReply({
+                content: 'Failed to create audio stream. The song might be unavailable.'
+            });
+        }
+        
+        await interaction.editReply({
+            content: `🔗 Connecting to voice channel for: **${songName}**...`
+        });
+        
+        const player = createAudioPlayer();
+        let resource;
+        
+        // Create audio resource from the stream
+        try {
+            if (stream.stream) {
+                // play-dl stream object
+                resource = createAudioResource(stream.stream, {
+                    inputType: stream.type
+                });
+                console.log('📦 Created resource from play-dl stream object');
+            } else {
+                // Direct stream
+                resource = createAudioResource(stream);
+                console.log('📦 Created resource from direct stream');
+            }
+        } catch (resourceError: any) {
+            console.error('❌ Failed to create audio resource:', resourceError);
+            return interaction.editReply({
+                content: `❌ Failed to create audio resource: ${resourceError.message}`
+            });
+        }
+        const connection = joinVoiceChannel({
+            channelId: voiceChannel,
+            guildId: guild.id,
+            adapterCreator: guild.voiceAdapterCreator
+        });
+
+        connection.subscribe(player);
+        player.play(resource);
+
+        player.on('error', error => {
+            console.error('Error playing song:', error);
+            interaction.editReply({
+                content: `❌ An error occurred while playing: **${songName}**`
+            });
+        });
+
+        player.on(AudioPlayerStatus.Idle, () => {
+            connection.destroy();
+            interaction.editReply({
+                content: `✅ Finished playing: **${songName}**`
+            });
+        });
+
+        await interaction.editReply({
+            content: `🎶 Now playing: **${songName}**`
+        });
+        
+    } catch (error) {
+        console.error('Error streaming song:', error);
+        return interaction.editReply({
+            content: 'Failed to stream the song. Please try again.'
+        });
+    }
+};

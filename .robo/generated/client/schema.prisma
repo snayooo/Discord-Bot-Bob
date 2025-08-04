@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../.robo/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id                   String   @id @default(uuid())
+  discordUserId        String   @unique
+  discordUsername      String
+  discordDiscriminator String
+  discordAvatarUrl     String?
+  minecraftId          String?  @unique
+  minecraftUsername    String?
+  coins                Int      @default(0)
+  level                Int      @default(0)
+  xp                   Int      @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}

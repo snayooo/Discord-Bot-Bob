@@ -1,0 +1,10 @@
+import { PrismaClient } from "../generated/client/index.js"; // Using the installed package
+const db = new PrismaClient({
+    log: [
+        'warn',
+        'error'
+    ]
+});
+export default db;
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkQ6XFxEZXZlbG9wZW1lbnRcXERpc2NvcmQgQm90c1xcSmF2YVNjcmlwdFxcQm9iXFxzcmNcXHV0aWxzXFxEQlV0aWxzLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBwYXRoIGZyb20gXCJwYXRoXCI7XHJcbmltcG9ydCB7IFByaXNtYUNsaWVudCB9IGZyb20gXCIuLi9nZW5lcmF0ZWQvY2xpZW50XCI7IC8vIFVzaW5nIHRoZSBpbnN0YWxsZWQgcGFja2FnZVxyXG5cclxuY29uc3QgZGIgPSBuZXcgUHJpc21hQ2xpZW50KHsgbG9nOiBbJ3dhcm4nLCAnZXJyb3InXSB9KTtcclxuXHJcbmV4cG9ydCBkZWZhdWx0IGRiO1xyXG4iXSwibmFtZXMiOlsiUHJpc21hQ2xpZW50IiwiZGIiLCJsb2ciXSwibWFwcGluZ3MiOiJBQUNBLFNBQVNBLFlBQVksUUFBUSwrQkFBc0IsQ0FBQyw4QkFBOEI7QUFFbEYsTUFBTUMsS0FBSyxJQUFJRCxhQUFhO0lBQUVFLEtBQUs7UUFBQztRQUFRO0tBQVE7QUFBQztBQUVyRCxlQUFlRCxHQUFHIn0=

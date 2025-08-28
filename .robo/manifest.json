@@ -19,24 +19,41 @@
     "language": "typescript",
     "mode": "development",
     "type": "robo",
-    "updatedAt": "2025-08-04T10:12:41.189Z",
+    "updatedAt": "2025-08-28T16:58:48.708Z",
     "version": "0.10.30"
   },
   "api": {},
   "commands": {
     "control": {
       "subcommands": {
-        "bot": {
+        "panel": {
           "subcommands": {
-            "restart": {
-              "__path": "\\.robo\\build\\commands\\control\\bot\\restart.js"
-            }
-          }
-        },
-        "message": {
-          "subcommands": {
-            "self-roles": {
-              "__path": "\\.robo\\build\\commands\\control\\message\\self-roles.js"
+            "bot-commands": {
+              "__path": "\\.robo\\build\\commands\\control\\panel\\bot-commands.js",
+              "description": "List of bot commands"
+            },
+            "minecraft": {
+              "__path": "\\.robo\\build\\commands\\control\\panel\\minecraft.js",
+              "defaultMemberPermissions": 8,
+              "description": "Sends a control panel embed for Minecraft servers.",
+              "options": [
+                {
+                  "name": "server",
+                  "choices": [
+                    {
+                      "name": "SMP",
+                      "value": "smp"
+                    },
+                    {
+                      "name": "Lele1337",
+                      "value": "lele1337"
+                    }
+                  ],
+                  "description": "The Minecraft server to control.",
+                  "required": true,
+                  "type": "string"
+                }
+              ]
             }
           }
         },
@@ -89,14 +106,14 @@
                   "type": "string"
                 },
                 {
-                  "name": "ssh-user",
-                  "description": "The SSH user for the server.",
+                  "name": "server-version",
+                  "description": "The version of the minecraft server.",
                   "required": true,
                   "type": "string"
                 },
                 {
-                  "name": "ssh-password",
-                  "description": "The SSH password for the server.",
+                  "name": "server-software",
+                  "description": "The software of the minecraft server.",
                   "required": true,
                   "type": "string"
                 }
@@ -104,29 +121,17 @@
             }
           }
         },
-        "panel": {
+        "message": {
           "subcommands": {
-            "minecraft": {
-              "__path": "\\.robo\\build\\commands\\control\\panel\\minecraft.js",
-              "description": "Sends a control panel embed for Minecraft servers.",
-              "options": [
-                {
-                  "name": "server",
-                  "choices": [
-                    {
-                      "name": "SMP",
-                      "value": "smp"
-                    },
-                    {
-                      "name": "Lele1337",
-                      "value": "lele1337"
-                    }
-                  ],
-                  "description": "The Minecraft server to control.",
-                  "required": true,
-                  "type": "string"
-                }
-              ]
+            "self-roles": {
+              "__path": "\\.robo\\build\\commands\\control\\message\\self-roles.js"
+            }
+          }
+        },
+        "bot": {
+          "subcommands": {
+            "restart": {
+              "__path": "\\.robo\\build\\commands\\control\\bot\\restart.js"
             }
           }
         }
@@ -135,6 +140,22 @@
     "daily": {
       "__path": "\\.robo\\build\\commands\\daily.js",
       "description": "Collect your daily coins."
+    },
+    "dev": {
+      "subcommands": {
+        "logs": {
+          "__path": "\\.robo\\build\\commands\\dev\\logs.js",
+          "description": "View most recent logs"
+        },
+        "restart": {
+          "__path": "\\.robo\\build\\commands\\dev\\restart.js",
+          "description": "Restart this Robo"
+        },
+        "status": {
+          "__path": "\\.robo\\build\\commands\\dev\\status.js",
+          "description": "View status of this Robo"
+        }
+      }
     },
     "help": {
       "__auto": true,
@@ -179,8 +200,17 @@
     },
     "play": {
       "subcommands": {
-        "queue": {
-          "__path": "\\.robo\\build\\commands\\play\\queue.js"
+        "sound": {
+          "__path": "\\.robo\\build\\commands\\play\\sound.js",
+          "description": "Play a sound.",
+          "options": [
+            {
+              "name": "sound",
+              "description": "The sound of the file to play. Type /list sounds to see the list of available sounds.",
+              "required": true,
+              "type": "string"
+            }
+          ]
         },
         "song": {
           "__path": "\\.robo\\build\\commands\\play\\song.js",
@@ -189,22 +219,6 @@
             {
               "name": "song",
               "description": "The song to play",
-              "required": true,
-              "type": "string"
-            }
-          ]
-        },
-        "skip": {
-          "__path": "\\.robo\\build\\commands\\play\\skip.js",
-          "description": "Skip the current song."
-        },
-        "sound": {
-          "__path": "\\.robo\\build\\commands\\play\\sound.js",
-          "description": "Play a sound.",
-          "options": [
-            {
-              "name": "sound",
-              "description": "The sound of the file to play. Type /list sounds to see the list of available sounds.",
               "required": true,
               "type": "string"
             }

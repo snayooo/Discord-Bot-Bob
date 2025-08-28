@@ -1,12 +1,16 @@
 import { ActivityType } from 'discord.js'
 import { client } from 'robo.js'
 import { serverEmbed } from '../utils/mcUtils'
+import { connectAllServers } from '../utils/rconUtils';
 
-export default () => {
+export default async () => {
 	client.user?.setActivity({
 		name: 'you',
 		type: ActivityType.Watching
 	})
+
+	// Connect RCON Minecraft servers
+	await connectAllServers();
 
 	// Update the Minecraft server embeds every minute
 	setInterval(async () => {
@@ -22,7 +26,7 @@ export default () => {
 		}
 
 		if (smpChannel.isTextBased()) {
-			const msg = await smpChannel.messages.fetch('1401921188074361034')
+			const msg = await smpChannel.messages.fetch('1409992446074683464')
 
 			if (msg) {
 				await msg.edit({ embeds: [smpEmbed] })
@@ -39,7 +43,7 @@ export default () => {
 		}
 
 		if (leleChannel.isTextBased()) {
-			const msg = await leleChannel.messages.fetch('1401921459076464812')
+			const msg = await leleChannel.messages.fetch('1409992512612990985')
 
 			if (msg) {
 				await msg.edit({ embeds: [leleEmbed] })

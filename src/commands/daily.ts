@@ -46,7 +46,7 @@ export default async (interaction: ChatInputCommandInteraction) => {
         }
     })
 
-    await interaction.editReply({
+    interaction.editReply({
         content: `You have claimed your daily reward of **${reward}** coins! Your total coins are now **${updatedUser.coins}**.`
     })
 }

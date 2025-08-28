@@ -25,16 +25,16 @@ model user {
 }
 
 model server {
-  id            String   @id @default(uuid()) @map("_id")
-  name          String   @unique
-  value         String   @unique
-  ip            String
-  port          Int
-  connIp        String
-  rconPort      Int
-  rconPassword  String
-  serverVersion String
+  id             String   @id @default(uuid()) @map("_id")
+  name           String   @unique
+  value          String   @unique
+  ip             String
+  port           Int
+  connIp         String
+  rconPort       Int
+  rconPassword   String
+  serverVersion  String
   serverSoftware String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

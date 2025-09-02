@@ -16,6 +16,11 @@ model user {
   discordAvatarUrl     String
   minecraftId          String?   @unique
   minecraftUsername    String?
+  websiteId            String?   @unique
+  websiteUsername      String?
+  websiteEmail         String?   @unique
+  websiteFirstName     String?
+  websiteLastName      String?
   coins                Int       @default(0)
   lastDailyReward      DateTime?
   level                Int       @default(0)

@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.12.0
- * Query Engine version: 8047c96bbd92db98a2abc7c9323ce77c02c89dbc
+ * Prisma Client JS version: 6.15.0
+ * Query Engine version: 85179d7826409ee107a6ba334b5e305ae3fba9fb
  */
 Prisma.prismaVersion = {
-  client: "6.12.0",
-  engine: "8047c96bbd92db98a2abc7c9323ce77c02c89dbc"
+  client: "6.15.0",
+  engine: "85179d7826409ee107a6ba334b5e305ae3fba9fb"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -121,6 +121,11 @@ exports.Prisma.UserScalarFieldEnum = {
   discordAvatarUrl: 'discordAvatarUrl',
   minecraftId: 'minecraftId',
   minecraftUsername: 'minecraftUsername',
+  websiteId: 'websiteId',
+  websiteUsername: 'websiteUsername',
+  websiteEmail: 'websiteEmail',
+  websiteFirstName: 'websiteFirstName',
+  websiteLastName: 'websiteLastName',
   coins: 'coins',
   lastDailyReward: 'lastDailyReward',
   level: 'level',

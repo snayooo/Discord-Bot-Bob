@@ -40,7 +40,7 @@ export type server = $Result.DefaultSelection<Prisma.$serverPayload>
  */
 export class PrismaClient<
   ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
-  U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
   ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
 > {
   [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
@@ -72,13 +72,6 @@ export class PrismaClient<
    * Disconnect from the database
    */
   $disconnect(): $Utils.JsPromise<void>;
-
-  /**
-   * Add a middleware
-   * @deprecated since 4.16.0. For new code, prefer client extensions instead.
-   * @see https://pris.ly/d/extensions
-   */
-  $use(cb: Prisma.Middleware): void
 
 /**
    * Allows the running of a sequence of read/write operations that are guaranteed to either succeed or fail as a whole.
@@ -193,8 +186,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.12.0
-   * Query Engine version: 8047c96bbd92db98a2abc7c9323ce77c02c89dbc
+   * Prisma Client JS version: 6.15.0
+   * Query Engine version: 85179d7826409ee107a6ba334b5e305ae3fba9fb
    */
   export type PrismaVersion = {
     client: string
@@ -778,16 +771,24 @@ export namespace Prisma {
     /**
      * @example
      * ```
-     * // Defaults to stdout
+     * // Shorthand for `emit: 'stdout'`
      * log: ['query', 'info', 'warn', 'error']
      * 
-     * // Emit as events
+     * // Emit as events only
      * log: [
-     *   { emit: 'stdout', level: 'query' },
-     *   { emit: 'stdout', level: 'info' },
-     *   { emit: 'stdout', level: 'warn' }
-     *   { emit: 'stdout', level: 'error' }
+     *   { emit: 'event', level: 'query' },
+     *   { emit: 'event', level: 'info' },
+     *   { emit: 'event', level: 'warn' }
+     *   { emit: 'event', level: 'error' }
      * ]
+     * 
+     * / Emit as events and log to stdout
+     * og: [
+     *  { emit: 'stdout', level: 'query' },
+     *  { emit: 'stdout', level: 'info' },
+     *  { emit: 'stdout', level: 'warn' }
+     *  { emit: 'stdout', level: 'error' }
+     * 
      * ```
      * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
      */
@@ -829,10 +830,15 @@ export namespace Prisma {
     emit: 'stdout' | 'event'
   }
 
-  export type GetLogType<T extends LogLevel | LogDefinition> = T extends LogDefinition ? T['emit'] extends 'event' ? T['level'] : never : never
-  export type GetEvents<T extends any> = T extends Array<LogLevel | LogDefinition> ?
-    GetLogType<T[0]> | GetLogType<T[1]> | GetLogType<T[2]> | GetLogType<T[3]>
-    : never
+  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
+
+  export type GetLogType<T> = CheckIsLogLevel<
+    T extends LogDefinition ? T['level'] : T
+  >;
+
+  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
+    ? GetLogType<T[number]>
+    : never;
 
   export type QueryEvent = {
     timestamp: Date
@@ -872,25 +878,6 @@ export namespace Prisma {
     | 'runCommandRaw'
     | 'findRaw'
     | 'groupBy'
-
-  /**
-   * These options are being passed into the middleware as "params"
-   */
-  export type MiddlewareParams = {
-    model?: ModelName
-    action: PrismaAction
-    args: any
-    dataPath: string[]
-    runInTransaction: boolean
-  }
-
-  /**
-   * The `T` type makes sure, that the `return proceed` is not forgotten in the middleware implementation
-   */
-  export type Middleware<T = any> = (
-    params: MiddlewareParams,
-    next: (params: MiddlewareParams) => $Utils.JsPromise<T>,
-  ) => $Utils.JsPromise<T>
 
   // tested in getLogLevel.test.ts
   export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
@@ -946,6 +933,11 @@ export namespace Prisma {
     discordAvatarUrl: string | null
     minecraftId: string | null
     minecraftUsername: string | null
+    websiteId: string | null
+    websiteUsername: string | null
+    websiteEmail: string | null
+    websiteFirstName: string | null
+    websiteLastName: string | null
     coins: number | null
     lastDailyReward: Date | null
     level: number | null
@@ -962,6 +954,11 @@ export namespace Prisma {
     discordAvatarUrl: string | null
     minecraftId: string | null
     minecraftUsername: string | null
+    websiteId: string | null
+    websiteUsername: string | null
+    websiteEmail: string | null
+    websiteFirstName: string | null
+    websiteLastName: string | null
     coins: number | null
     lastDailyReward: Date | null
     level: number | null
@@ -978,6 +975,11 @@ export namespace Prisma {
     discordAvatarUrl: number
     minecraftId: number
     minecraftUsername: number
+    websiteId: number
+    websiteUsername: number
+    websiteEmail: number
+    websiteFirstName: number
+    websiteLastName: number
     coins: number
     lastDailyReward: number
     level: number
@@ -1008,6 +1010,11 @@ export namespace Prisma {
     discordAvatarUrl?: true
     minecraftId?: true
     minecraftUsername?: true
+    websiteId?: true
+    websiteUsername?: true
+    websiteEmail?: true
+    websiteFirstName?: true
+    websiteLastName?: true
     coins?: true
     lastDailyReward?: true
     level?: true
@@ -1024,6 +1031,11 @@ export namespace Prisma {
     discordAvatarUrl?: true
     minecraftId?: true
     minecraftUsername?: true
+    websiteId?: true
+    websiteUsername?: true
+    websiteEmail?: true
+    websiteFirstName?: true
+    websiteLastName?: true
     coins?: true
     lastDailyReward?: true
     level?: true
@@ -1040,6 +1052,11 @@ export namespace Prisma {
     discordAvatarUrl?: true
     minecraftId?: true
     minecraftUsername?: true
+    websiteId?: true
+    websiteUsername?: true
+    websiteEmail?: true
+    websiteFirstName?: true
+    websiteLastName?: true
     coins?: true
     lastDailyReward?: true
     level?: true
@@ -1143,6 +1160,11 @@ export namespace Prisma {
     discordAvatarUrl: string
     minecraftId: string | null
     minecraftUsername: string | null
+    websiteId: string | null
+    websiteUsername: string | null
+    websiteEmail: string | null
+    websiteFirstName: string | null
+    websiteLastName: string | null
     coins: number
     lastDailyReward: Date | null
     level: number
@@ -1178,6 +1200,11 @@ export namespace Prisma {
     discordAvatarUrl?: boolean
     minecraftId?: boolean
     minecraftUsername?: boolean
+    websiteId?: boolean
+    websiteUsername?: boolean
+    websiteEmail?: boolean
+    websiteFirstName?: boolean
+    websiteLastName?: boolean
     coins?: boolean
     lastDailyReward?: boolean
     level?: boolean
@@ -1196,6 +1223,11 @@ export namespace Prisma {
     discordAvatarUrl?: boolean
     minecraftId?: boolean
     minecraftUsername?: boolean
+    websiteId?: boolean
+    websiteUsername?: boolean
+    websiteEmail?: boolean
+    websiteFirstName?: boolean
+    websiteLastName?: boolean
     coins?: boolean
     lastDailyReward?: boolean
     level?: boolean
@@ -1204,7 +1236,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type userOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "discordUserId" | "discordUsername" | "discordDiscriminator" | "discordAvatarUrl" | "minecraftId" | "minecraftUsername" | "coins" | "lastDailyReward" | "level" | "xp" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type userOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "discordUserId" | "discordUsername" | "discordDiscriminator" | "discordAvatarUrl" | "minecraftId" | "minecraftUsername" | "websiteId" | "websiteUsername" | "websiteEmail" | "websiteFirstName" | "websiteLastName" | "coins" | "lastDailyReward" | "level" | "xp" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 
   export type $userPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "user"
@@ -1217,6 +1249,11 @@ export namespace Prisma {
       discordAvatarUrl: string
       minecraftId: string | null
       minecraftUsername: string | null
+      websiteId: string | null
+      websiteUsername: string | null
+      websiteEmail: string | null
+      websiteFirstName: string | null
+      websiteLastName: string | null
       coins: number
       lastDailyReward: Date | null
       level: number
@@ -1622,6 +1659,11 @@ export namespace Prisma {
     readonly discordAvatarUrl: FieldRef<"user", 'String'>
     readonly minecraftId: FieldRef<"user", 'String'>
     readonly minecraftUsername: FieldRef<"user", 'String'>
+    readonly websiteId: FieldRef<"user", 'String'>
+    readonly websiteUsername: FieldRef<"user", 'String'>
+    readonly websiteEmail: FieldRef<"user", 'String'>
+    readonly websiteFirstName: FieldRef<"user", 'String'>
+    readonly websiteLastName: FieldRef<"user", 'String'>
     readonly coins: FieldRef<"user", 'Int'>
     readonly lastDailyReward: FieldRef<"user", 'DateTime'>
     readonly level: FieldRef<"user", 'Int'>
@@ -3035,6 +3077,11 @@ export namespace Prisma {
     discordAvatarUrl: 'discordAvatarUrl',
     minecraftId: 'minecraftId',
     minecraftUsername: 'minecraftUsername',
+    websiteId: 'websiteId',
+    websiteUsername: 'websiteUsername',
+    websiteEmail: 'websiteEmail',
+    websiteFirstName: 'websiteFirstName',
+    websiteLastName: 'websiteLastName',
     coins: 'coins',
     lastDailyReward: 'lastDailyReward',
     level: 'level',
@@ -3155,6 +3202,11 @@ export namespace Prisma {
     discordAvatarUrl?: StringFilter<"user"> | string
     minecraftId?: StringNullableFilter<"user"> | string | null
     minecraftUsername?: StringNullableFilter<"user"> | string | null
+    websiteId?: StringNullableFilter<"user"> | string | null
+    websiteUsername?: StringNullableFilter<"user"> | string | null
+    websiteEmail?: StringNullableFilter<"user"> | string | null
+    websiteFirstName?: StringNullableFilter<"user"> | string | null
+    websiteLastName?: StringNullableFilter<"user"> | string | null
     coins?: IntFilter<"user"> | number
     lastDailyReward?: DateTimeNullableFilter<"user"> | Date | string | null
     level?: IntFilter<"user"> | number
@@ -3171,6 +3223,11 @@ export namespace Prisma {
     discordAvatarUrl?: SortOrder
     minecraftId?: SortOrder
     minecraftUsername?: SortOrder
+    websiteId?: SortOrder
+    websiteUsername?: SortOrder
+    websiteEmail?: SortOrder
+    websiteFirstName?: SortOrder
+    websiteLastName?: SortOrder
     coins?: SortOrder
     lastDailyReward?: SortOrder
     level?: SortOrder
@@ -3183,6 +3240,8 @@ export namespace Prisma {
     id?: string
     discordUserId?: string
     minecraftId?: string
+    websiteId?: string
+    websiteEmail?: string
     AND?: userWhereInput | userWhereInput[]
     OR?: userWhereInput[]
     NOT?: userWhereInput | userWhereInput[]
@@ -3190,13 +3249,16 @@ export namespace Prisma {
     discordDiscriminator?: StringFilter<"user"> | string
     discordAvatarUrl?: StringFilter<"user"> | string
     minecraftUsername?: StringNullableFilter<"user"> | string | null
+    websiteUsername?: StringNullableFilter<"user"> | string | null
+    websiteFirstName?: StringNullableFilter<"user"> | string | null
+    websiteLastName?: StringNullableFilter<"user"> | string | null
     coins?: IntFilter<"user"> | number
     lastDailyReward?: DateTimeNullableFilter<"user"> | Date | string | null
     level?: IntFilter<"user"> | number
     xp?: IntFilter<"user"> | number
     createdAt?: DateTimeFilter<"user"> | Date | string
     updatedAt?: DateTimeFilter<"user"> | Date | string
-  }, "id" | "discordUserId" | "minecraftId">
+  }, "id" | "discordUserId" | "minecraftId" | "websiteId" | "websiteEmail">
 
   export type userOrderByWithAggregationInput = {
     id?: SortOrder
@@ -3206,6 +3268,11 @@ export namespace Prisma {
     discordAvatarUrl?: SortOrder
     minecraftId?: SortOrder
     minecraftUsername?: SortOrder
+    websiteId?: SortOrder
+    websiteUsername?: SortOrder
+    websiteEmail?: SortOrder
+    websiteFirstName?: SortOrder
+    websiteLastName?: SortOrder
     coins?: SortOrder
     lastDailyReward?: SortOrder
     level?: SortOrder
@@ -3230,6 +3297,11 @@ export namespace Prisma {
     discordAvatarUrl?: StringWithAggregatesFilter<"user"> | string
     minecraftId?: StringNullableWithAggregatesFilter<"user"> | string | null
     minecraftUsername?: StringNullableWithAggregatesFilter<"user"> | string | null
+    websiteId?: StringNullableWithAggregatesFilter<"user"> | string | null
+    websiteUsername?: StringNullableWithAggregatesFilter<"user"> | string | null
+    websiteEmail?: StringNullableWithAggregatesFilter<"user"> | string | null
+    websiteFirstName?: StringNullableWithAggregatesFilter<"user"> | string | null
+    websiteLastName?: StringNullableWithAggregatesFilter<"user"> | string | null
     coins?: IntWithAggregatesFilter<"user"> | number
     lastDailyReward?: DateTimeNullableWithAggregatesFilter<"user"> | Date | string | null
     level?: IntWithAggregatesFilter<"user"> | number
@@ -3335,6 +3407,11 @@ export namespace Prisma {
     discordAvatarUrl: string
     minecraftId?: string | null
     minecraftUsername?: string | null
+    websiteId?: string | null
+    websiteUsername?: string | null
+    websiteEmail?: string | null
+    websiteFirstName?: string | null
+    websiteLastName?: string | null
     coins?: number
     lastDailyReward?: Date | string | null
     level?: number
@@ -3351,6 +3428,11 @@ export namespace Prisma {
     discordAvatarUrl: string
     minecraftId?: string | null
     minecraftUsername?: string | null
+    websiteId?: string | null
+    websiteUsername?: string | null
+    websiteEmail?: string | null
+    websiteFirstName?: string | null
+    websiteLastName?: string | null
     coins?: number
     lastDailyReward?: Date | string | null
     level?: number
@@ -3366,6 +3448,11 @@ export namespace Prisma {
     discordAvatarUrl?: StringFieldUpdateOperationsInput | string
     minecraftId?: NullableStringFieldUpdateOperationsInput | string | null
     minecraftUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteLastName?: NullableStringFieldUpdateOperationsInput | string | null
     coins?: IntFieldUpdateOperationsInput | number
     lastDailyReward?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
@@ -3381,6 +3468,11 @@ export namespace Prisma {
     discordAvatarUrl?: StringFieldUpdateOperationsInput | string
     minecraftId?: NullableStringFieldUpdateOperationsInput | string | null
     minecraftUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteLastName?: NullableStringFieldUpdateOperationsInput | string | null
     coins?: IntFieldUpdateOperationsInput | number
     lastDailyReward?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
@@ -3397,6 +3489,11 @@ export namespace Prisma {
     discordAvatarUrl: string
     minecraftId?: string | null
     minecraftUsername?: string | null
+    websiteId?: string | null
+    websiteUsername?: string | null
+    websiteEmail?: string | null
+    websiteFirstName?: string | null
+    websiteLastName?: string | null
     coins?: number
     lastDailyReward?: Date | string | null
     level?: number
@@ -3412,6 +3509,11 @@ export namespace Prisma {
     discordAvatarUrl?: StringFieldUpdateOperationsInput | string
     minecraftId?: NullableStringFieldUpdateOperationsInput | string | null
     minecraftUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteLastName?: NullableStringFieldUpdateOperationsInput | string | null
     coins?: IntFieldUpdateOperationsInput | number
     lastDailyReward?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
@@ -3427,6 +3529,11 @@ export namespace Prisma {
     discordAvatarUrl?: StringFieldUpdateOperationsInput | string
     minecraftId?: NullableStringFieldUpdateOperationsInput | string | null
     minecraftUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteId?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteUsername?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteFirstName?: NullableStringFieldUpdateOperationsInput | string | null
+    websiteLastName?: NullableStringFieldUpdateOperationsInput | string | null
     coins?: IntFieldUpdateOperationsInput | number
     lastDailyReward?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     level?: IntFieldUpdateOperationsInput | number
@@ -3609,6 +3716,11 @@ export namespace Prisma {
     discordAvatarUrl?: SortOrder
     minecraftId?: SortOrder
     minecraftUsername?: SortOrder
+    websiteId?: SortOrder
+    websiteUsername?: SortOrder
+    websiteEmail?: SortOrder
+    websiteFirstName?: SortOrder
+    websiteLastName?: SortOrder
     coins?: SortOrder
     lastDailyReward?: SortOrder
     level?: SortOrder
@@ -3631,6 +3743,11 @@ export namespace Prisma {
     discordAvatarUrl?: SortOrder
     minecraftId?: SortOrder
     minecraftUsername?: SortOrder
+    websiteId?: SortOrder
+    websiteUsername?: SortOrder
+    websiteEmail?: SortOrder
+    websiteFirstName?: SortOrder
+    websiteLastName?: SortOrder
     coins?: SortOrder
     lastDailyReward?: SortOrder
     level?: SortOrder
@@ -3647,6 +3764,11 @@ export namespace Prisma {
     discordAvatarUrl?: SortOrder
     minecraftId?: SortOrder
     minecraftUsername?: SortOrder
+    websiteId?: SortOrder
+    websiteUsername?: SortOrder
+    websiteEmail?: SortOrder
+    websiteFirstName?: SortOrder
+    websiteLastName?: SortOrder
     coins?: SortOrder
     lastDailyReward?: SortOrder
     level?: SortOrder
